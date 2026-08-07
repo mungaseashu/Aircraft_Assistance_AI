@@ -14,12 +14,12 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-import boto3
+from huggingface_hub import InferenceClient
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from src.aircraft_maintenance.bedrock_maintenance_analyzer import AircraftMaintenanceAnalyzer
+from src.aircraft_maintenance.qwen_maintenance_analyzer import QwenAircraftMaintenanceAnalyzer
 from src.aircraft_maintenance.engineering_analytics import AircraftEngineeringAnalytics
 
 # Load environment variables from .env file
@@ -147,29 +147,23 @@ def maintenance_prediction(payload: dict[str, Any]) -> dict[str, Any]:
         )
 
     try:
-        aws_region = os.getenv("AWS_REGION", "ap-south-1")
-        aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
-        aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-        bedrock_model_id = os.getenv("BEDROCK_MODEL_ID", "amazon.nova-micro-v1:0")
+        hf_token = os.getenv("HF_API_TOKEN")
+        if hf_token:
+            hf_token = hf_token.strip().strip('"').strip("'")
+        if not hf_token:
+            hf_token = None
 
-        boto3_kwargs = {
-            "service_name": "bedrock-runtime",
-            "region_name": aws_region,
-        }
-        
-        # Only add explicit credentials if they are provided in .env
-        # Otherwise, boto3 will fall back to default credential providers (e.g., ~/.aws/credentials)
-        if aws_access_key and aws_access_key != "YOUR_ACCESS_KEY" and aws_secret_key and aws_secret_key != "YOUR_SECRET_KEY":
-            boto3_kwargs["aws_access_key_id"] = aws_access_key
-            boto3_kwargs["aws_secret_access_key"] = aws_secret_key
+        hf_model_id = os.getenv("HF_MODEL_ID", "Qwen/Qwen2.5-72B-Instruct")
+        if hf_model_id:
+            hf_model_id = hf_model_id.strip().strip('"').strip("'")
 
-        bedrock_client = boto3.client(**boto3_kwargs)
+        hf_client = InferenceClient(api_key=hf_token)
 
-        analyzer = AircraftMaintenanceAnalyzer(
-            bedrock_client=bedrock_client,
-            model_id=bedrock_model_id,
+        analyzer = QwenAircraftMaintenanceAnalyzer(
+            hf_client=hf_client,
+            model_id=hf_model_id,
             manual_pdf_path=manual_pdf_path,
-            temperature=0.2,
+            temperature=0.1,
             max_tokens=2_000,
         )
 

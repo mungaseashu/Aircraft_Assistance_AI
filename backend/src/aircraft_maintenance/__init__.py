@@ -1,6 +1,6 @@
 """Core aircraft maintenance modules."""
 
-from .bedrock_maintenance_analyzer import AircraftMaintenanceAnalyzer
+from .qwen_maintenance_analyzer import QwenAircraftMaintenanceAnalyzer
 from .engineering_analytics import AircraftEngineeringAnalytics
 
-__all__ = ["AircraftMaintenanceAnalyzer", "AircraftEngineeringAnalytics"]
+__all__ = ["QwenAircraftMaintenanceAnalyzer", "AircraftEngineeringAnalytics"]
