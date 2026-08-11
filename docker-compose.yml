@@ -1,0 +1,24 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE:-ghcr.io/mungaseashu/aircraft-assistance-backend:latest}
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    container_name: aerocare-backend
+    restart: always
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/mungaseashu/aircraft-assistance-frontend:latest}
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: aerocare-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend

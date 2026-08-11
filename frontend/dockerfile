@@ -1,0 +1,15 @@
+# Use an official lightweight Node.js image
+FROM node:20-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+COPY package.json ./
+
+# Install frontend dependencies (fresh install for Linux platform bindings)
+RUN npm install
+
+# Copy the rest of the frontend source code
+COPY . .
+
+CMD ["npm", "run", "dev", "--", "--host"]
