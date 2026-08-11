@@ -156,7 +156,7 @@ function App() {
   const engineGauges = useMemo(() => {
     if (!currentRecord) return [];
     return [
-      { label: 'Engine Temp', value: currentRecord.Engine_Temperature, unit: '°C', max: 900, warn: 750 },
+      { label: 'Engine Temperature', value: currentRecord.Engine_Temperature, unit: '°C', max: 900, warn: 750 },
       { label: 'EGT', value: currentRecord.Exhaust_Gas_Temperature, unit: '°C', max: 850, warn: 700 },
       { label: 'Oil Temp', value: currentRecord.Oil_Temperature, unit: '°C', max: 150, warn: 110 },
       { label: 'Oil Pressure', value: currentRecord.Oil_Pressure, unit: 'psi', max: 65, warn: 45 },
