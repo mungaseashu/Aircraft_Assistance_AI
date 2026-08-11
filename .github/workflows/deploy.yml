@@ -83,6 +83,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: REGISTRY,BACKEND_IMAGE_NAME,FRONTEND_IMAGE_NAME
           script: |
+            set -e
+
             # Create project directory
             mkdir -p ~/aerocare
             cd ~/aerocare
@@ -109,9 +111,19 @@ jobs:
             echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> backend/.env
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> backend/.env
 
+            # Detect which Docker Compose command is available
+            if docker compose version >/dev/null 2>&1; then
+              COMPOSE_CMD="docker compose"
+            elif docker-compose version >/dev/null 2>&1; then
+              COMPOSE_CMD="docker-compose"
+            else
+              echo "Error: neither 'docker compose' nor 'docker-compose' is installed on the EC2 server!"
+              exit 1
+            fi
+
             # Make sure Docker Compose pulls the latest images and recreates containers
-            docker compose pull
-            docker compose up -d --remove-orphans
+            $COMPOSE_CMD pull
+            $COMPOSE_CMD up -d --remove-orphans
 
             # Clean up old dangling images
             docker image prune -f
